@@ -1,0 +1,74 @@
+﻿@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@keyframes taiji-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.taiji-spin {
+  animation: taiji-spin 1.2s linear infinite;
+}
+
+:root {
+  color-scheme: light;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  @apply bg-paper text-ink;
+  font-family: "Noto Serif SC", "Source Han Serif SC", "STSong", serif;
+  letter-spacing: 0.01em;
+}
+
+@keyframes ai-progress {
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(220%);
+  }
+}
+
+.ai-progress {
+  animation: ai-progress 1.2s infinite ease-in-out;
+}
+
+@keyframes mist-drift {
+  0% {
+    transform: translate3d(-6%, -2%, 0) scale(1);
+    opacity: 0.45;
+  }
+  50% {
+    transform: translate3d(6%, 2%, 0) scale(1.05);
+    opacity: 0.6;
+  }
+  100% {
+    transform: translate3d(-4%, 0%, 0) scale(1);
+    opacity: 0.5;
+  }
+}
+
+.mist-layer {
+  animation: mist-drift 16s ease-in-out infinite;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+input,
+select,
+button {
+  font-family: "Noto Serif SC", "Source Han Serif SC", "STSong", serif;
+}
+
