@@ -216,7 +216,10 @@ export default function Home() {
       <div className="pointer-events-none absolute inset-0 bg-[repeating-linear-gradient(135deg,_rgba(176,138,74,0.04)_0px,_rgba(176,138,74,0.04)_2px,_transparent_2px,_transparent_12px)] opacity-60" />
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,_rgba(0,0,0,0.06),_transparent_60%)] mix-blend-multiply" />
       <div className="pointer-events-none absolute inset-0 mist-layer bg-[radial-gradient(circle_at_30%_40%,_rgba(120,120,120,0.15),_transparent_55%),radial-gradient(circle_at_70%_60%,_rgba(120,120,120,0.12),_transparent_60%)]" />
-      <div className="pointer-events-none absolute top-[-40px] left-1/2 -translate-x-1/2 text-[320px] text-bronze/10">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute top-[-40px] left-1/2 hidden -translate-x-1/2 select-none text-[320px] text-bronze/10 sm:block"
+      >
         ☯
       </div>
 
