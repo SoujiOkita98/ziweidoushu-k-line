@@ -55,7 +55,12 @@ const buildScores = (chart: ZiweiChart, kline: { luck: number }[]) => {
 };
 
 const buildKlinePhases = (kline: { age: number; luck: number }[]) => {
-  const decades = [];
+  const decades: Array<{
+    start: number;
+    end: number;
+    avg: number;
+    variance: number;
+  }> = [];
   for (let start = 0; start <= 90; start += 10) {
     const end = start === 90 ? 100 : start + 9;
     const points = kline.filter((p) => p.age >= start && p.age <= end);
@@ -126,7 +131,7 @@ export async function POST(req: Request) {
         fourTransforms: chart.center.fourTransforms,
         decadeRanges: chart.palaces
           .map((palace) => palace.decadeRange)
-          .filter(Boolean)
+          .filter((range): range is string => typeof range === "string" && range.length > 0)
       },
       warnings:
         input.calendarType === "lunar"

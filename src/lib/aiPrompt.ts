@@ -83,7 +83,12 @@ const formatRange = (start: number, end: number) => {
 };
 
 const buildKlineSummary = (kline: KlinePoint[]) => {
-  const decades = [];
+  const decades: Array<{
+    start: number;
+    end: number;
+    avg: number;
+    variance: number;
+  }> = [];
   for (let start = 0; start <= 90; start += 10) {
     const end = start === 90 ? 100 : start + 9;
     const points = kline.filter((p) => p.age >= start && p.age <= end);

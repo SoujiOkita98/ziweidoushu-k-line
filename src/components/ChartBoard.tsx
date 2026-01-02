@@ -67,8 +67,18 @@ export default function ChartBoard({ chart }: { chart: ZiweiChart }) {
     "row-start-4"
   ];
 
+  type LayoutCell =
+    | { type: "palace"; name: string; col: number; row: number }
+    | {
+        type: "center";
+        col: number;
+        row: number;
+        colSpan: number;
+        rowSpan: number;
+      };
+
   // 固定 4x4 盘面布局，保持专业排版密度
-  const layout = [
+  const layout: LayoutCell[] = [
     { type: "palace", name: "父母", col: 1, row: 1 },
     { type: "palace", name: "福德", col: 2, row: 1 },
     { type: "palace", name: "田宅", col: 3, row: 1 },
