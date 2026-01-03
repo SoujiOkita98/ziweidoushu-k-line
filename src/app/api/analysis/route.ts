@@ -1,7 +1,8 @@
-﻿import { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { z } from "zod";
 import { generateAnalysisText } from "@/lib/ai";
 import type { AnalysisInput } from "@/lib/aiPrompt";
+import { buildToneProverb, formatAnalysisWithTone } from "@/lib/toneProverb";
 import type { Palace, ZiweiChart } from "@/lib/types";
 
 const schema = z.object({
@@ -52,7 +53,8 @@ const scoreFromPalace = (palace?: Palace): number => {
 
 const buildScores = (chart: ZiweiChart, kline: { luck: number }[]) => {
   const totalAvg =
-    kline.reduce((acc, point) => acc + point.luck, 0) / Math.max(1, kline.length);
+    kline.reduce((acc, point) => acc + point.luck, 0) /
+    Math.max(1, kline.length);
 
   const wealth = scoreFromPalace(getPalace(chart, "财帛"));
   const career = scoreFromPalace(getPalace(chart, "官禄"));
@@ -93,14 +95,16 @@ export async function POST(req: Request) {
     };
 
     const analysisText = await generateAnalysisText(analysisInput);
+    const proverb = buildToneProverb(analysisInput);
     console.info("[api/analysis] ok", { ms: Date.now() - startedAt });
-    return NextResponse.json({ analysisText });
+    return NextResponse.json({
+      analysisText: formatAnalysisWithTone(proverb, analysisText)
+    });
   } catch (error) {
     console.error("[api/analysis] error", error);
     const message =
-      (error as Error)?.name === "AbortError"
-        ? "AI 超时，请重试"
-        : "AI 生成失败";
+      (error as Error)?.name === "AbortError" ? "AI 超时，请重试" : "AI 生成失败";
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
+

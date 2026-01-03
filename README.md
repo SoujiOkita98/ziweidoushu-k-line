@@ -1,42 +1,70 @@
-﻿# Zi Wei Dou Shu 命盘 + 人生K线 (MVP)
+# life-kline — Zi Wei Dou Shu × “Life K-Line”
 
-Personal Fun Project 纯属娱乐，切勿当真
-输入出生信息，生成紫微斗数命盘 + 人生K线图。
+Personal project, just for fun.
 
-## 运行
+## Status
+
+MVP 1.5 — Landing page is still a prototype and everything is a work in progress.
+
+This is a small Next.js app that:
+- Generates a Zi Wei Dou Shu (紫微斗数) chart (via `iztro`)
+- Renders a 4×4 palace board UI
+- Generates a playful “life K-line” curve (0–100) and visualizes it with ECharts
+- Optionally calls an AI “master” for analysis + chat (OpenAI Responses API)
+
+## Demo
+
+- Local: `http://localhost:3000`
+
+## Getting Started
 
 ```bash
+cd life-kline
 npm install
 npm run dev
 ```
 
-浏览 `http://localhost:3000`。
+## Environment Variables
 
-## 构建
+Create `life-kline/.env.local`:
 
 ```bash
-npm run build
-npm run start
+OPENAI_API_KEY=your_key_here
 ```
 
-## 结构说明
+Notes:
+- If you don’t set `OPENAI_API_KEY`, `/api/analysis` and `/api/chat` won’t work.
+- Current AI config lives in `src/lib/aiConfig.ts` (per-feature `model` + `reasoningEffort`), and is used by `src/lib/ai.ts`.
+- AI persona (tone/style) lives in `src/lib/aiPersona.ts` and applies to both analysis + chat.
+- If your chosen `model` isn’t available, the server falls back to `OPENAI_FALLBACK_MODEL` (default: `gpt-5-nano`).
 
-- `src/app/page.tsx`：主页面，输入表单 + 结果展示
-- `src/app/api/chart/route.ts`：排盘 API
-- `src/components/ChartBoard.tsx`：命盘 4x4 布局渲染
-- `src/components/LifeKline.tsx`：ECharts 人生K线
-- `src/lib/ziwei.ts`：iztro 封装与命盘归一化
-- `src/lib/kline.ts`：K线评分算法
+## Scripts
 
-## K线权重调整
+```bash
+npm run dev
+npm run build
+npm run start
+npm run lint
+```
 
-修改 `src/lib/kline.ts` 内的权重：
+## Project Structure
 
-- `AUSPICIOUS` / `INAUSPICIOUS`：吉星与煞星名单
-- `generateKline` 中 `50 + goodScore - badScore + ...` 公式
+- `src/app/page.tsx`: main UI (form, tabs, results)
+- `src/app/api/chart/route.ts`: generates chart + K-line (MVP scoring included)
+- `src/app/api/analysis/route.ts`: AI analysis endpoint
+- `src/app/api/chat/route.ts`: AI chat endpoint (“master”)
+- `src/components/ChartBoard.tsx`: 4×4 Zi Wei palace board
+- `src/components/LifeKline.tsx`: ECharts-based “life K-line” chart
+- `src/components/MasterChat.tsx`: chat UI
+- `src/lib/ziwei.ts`: wraps `iztro` and normalizes palace data
+- `src/lib/kline.ts`: K-line generation logic (stars/transforms → score curve)
+- `src/lib/ai.ts`: OpenAI Responses API client + helpers
 
-## 限制
+## Disclaimer
 
-- 阴历支持依赖 iztro 排盘；若失败请改用阳历
-- K线算法为 MVP 版启发式估算，仅用于演示
+This project is for entertainment only (just for fun).  
+It’s not financial/medical/legal advice, and it’s not meant to be “accurate” astrology.
 
+## License
+
+MIT — see `LICENSE`.

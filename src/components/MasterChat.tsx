@@ -22,6 +22,8 @@ export default function MasterChat({
   const setMessages = externalSetMessages ?? setInternalMessages;
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [progressLabel, setProgressLabel] = useState("占卜中…");
   const listRef = useRef<HTMLDivElement | null>(null);
   const endRef = useRef<HTMLDivElement | null>(null);
 
@@ -30,6 +32,33 @@ export default function MasterChat({
       setMessages([{ role: "assistant", content: initialGreeting }]);
     }
   }, [initialGreeting, messages.length, setMessages]);
+
+  useEffect(() => {
+    if (!loading) {
+      setProgress(0);
+      setProgressLabel("占卜中…");
+      return;
+    }
+
+    setProgress(6);
+    setProgressLabel("占卜中…");
+    const startedAt = Date.now();
+
+    const timer = setInterval(() => {
+      setProgress((prev) => {
+        const elapsed = Date.now() - startedAt;
+        const target = Math.min(92, Math.round((elapsed / 25000) * 92) + 6);
+        const next = Math.max(prev, target);
+        return next >= 92 ? 92 : next;
+      });
+
+      const elapsedSeconds = Math.floor((Date.now() - startedAt) / 1000);
+      if (elapsedSeconds >= 18) setProgressLabel("推演中…");
+      if (elapsedSeconds >= 28) setProgressLabel("快出结果了…");
+    }, 180);
+
+    return () => clearInterval(timer);
+  }, [loading]);
 
   useEffect(() => {
     const el = listRef.current;
@@ -58,6 +87,7 @@ export default function MasterChat({
 
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
+    setProgress(8);
     setLoading(true);
 
     try {
@@ -86,7 +116,8 @@ export default function MasterChat({
         { role: "assistant", content: "网络或服务异常，请稍后重试。" }
       ]);
     } finally {
-      setLoading(false);
+      setProgress(100);
+      setTimeout(() => setLoading(false), 250);
     }
   };
 
@@ -107,6 +138,23 @@ export default function MasterChat({
           </span>
         ) : null}
       </div>
+
+      {loading ? (
+        <div className="mt-3 rounded-lg border border-ink/10 bg-white px-3 py-2 shadow-sm">
+          <div className="flex items-center justify-between">
+            <div className="text-[11px] font-semibold tracking-[0.12em] text-ink">
+              {progressLabel}
+            </div>
+            <div className="text-[10px] text-ink/60">{progress}%</div>
+          </div>
+          <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-mist/80">
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-[#b08a4a] via-[#0f172a] to-[#f2d28a] transition-[width] duration-200"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+        </div>
+      ) : null}
 
       <div
         ref={listRef}
@@ -131,6 +179,24 @@ export default function MasterChat({
             </div>
           );
         })}
+        {loading ? (
+          <div className="flex justify-start">
+            <div className="max-w-[80%] rounded-lg border border-ink/10 bg-white px-3 py-2 text-sm text-ink shadow-sm">
+              <div className="flex items-center justify-between">
+                <div className="text-[11px] font-semibold tracking-[0.12em] text-ink">
+                  {progressLabel}
+                </div>
+                <div className="text-[10px] text-ink/60">{progress}%</div>
+              </div>
+              <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-ink/10">
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-[#b08a4a] via-[#0f172a] to-[#f2d28a] transition-[width] duration-200"
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
+            </div>
+          </div>
+        ) : null}
         <div ref={endRef} />
       </div>
 

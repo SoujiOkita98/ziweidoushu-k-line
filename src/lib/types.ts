@@ -35,6 +35,7 @@ export type ZiweiChart = {
 export type KlinePoint = {
   age: number;
   luck: number;
+  achievement?: number;
   confidence: number;
   drivers: string[];
 };

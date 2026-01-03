@@ -1,10 +1,11 @@
 ﻿"use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import ChartBoard from "@/components/ChartBoard";
 import LifeKline from "@/components/LifeKline";
 import MasterChat from "@/components/MasterChat";
+import { splitToneFromAnalysisText } from "@/lib/toneProverb";
 import type {
   AnalysisTextResponse,
   ChartResponse,
@@ -25,6 +26,8 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState<"chart" | "kline" | "chat">(
     "chart"
   );
+  const formRef = useRef<HTMLFormElement | null>(null);
+  const resultRef = useRef<HTMLDivElement | null>(null);
   const [result, setResult] = useState<ChartResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -169,7 +172,33 @@ export default function Home() {
     });
   };
 
-  const parsedAnalysis = analysisText ? parseAnalysis(analysisText) : [];
+  const { proverb: toneProverb, body: analysisBody } = splitToneFromAnalysisText(
+    analysisText
+  );
+  const parsedAnalysisBody = analysisBody ? parseAnalysis(analysisBody) : [];
+
+  const scrollTo = (target: "form" | "result") => {
+    const node = target === "form" ? formRef.current : resultRef.current;
+    if (!node) return;
+    node.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  const goToFeature = (tab: "chart" | "kline" | "chat") => {
+    setActiveTab(tab);
+    if (!result) {
+      setError("请先生成命盘，再查看命盘 / K线 / 问答。");
+      scrollTo("form");
+      return;
+    }
+    requestAnimationFrame(() => scrollTo("result"));
+  };
+
+  const tabClass = (active: boolean) =>
+    `rounded-full px-4 py-2 text-xs font-semibold transition ${
+      active
+        ? "bg-ink text-bronze shadow-sm"
+        : "bg-transparent text-ink/70 hover:bg-white/70"
+    }`;
 
   const buildChatContext = (): ChatContext | null => {
     if (!result || !result.scores || !result.klinePhases) return null;
@@ -230,12 +259,116 @@ export default function Home() {
             紫微斗数命盘 + 人生K线
           </h1>
           <p className="text-sm text-ink/70">
-            输入出生信息，生成专业命盘与人生运势曲线（MVP 原型）。
+            输入出生信息，生成专业命盘与人生运势曲线（MVP 1.5）。
           </p>
+          <div className="rounded-lg border border-ink/10 bg-white/70 px-3 py-2 text-xs text-ink/70">
+            <span className="font-semibold text-ink">Note:</span>{" "}
+            这是一个个人项目的 MVP 1.5 版本，功能与 UI 还在持续迭代中。
+          </div>
         </header>
+
+        <section className="grid gap-3 sm:grid-cols-3">
+          <div className="flex items-center justify-between sm:col-span-3">
+            <div className="text-xs font-semibold tracking-[0.22em] text-ink/60">
+              CORE FEATURES
+            </div>
+            <div className="hidden items-center gap-2 text-[11px] text-ink/60 sm:flex">
+              <span className="h-1 w-1 rounded-full bg-bronze/80" />
+              三大功能
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => goToFeature("chart")}
+            className="group relative overflow-hidden rounded-2xl border border-ink/10 bg-white/70 p-4 text-left shadow-panel backdrop-blur-sm transition hover:border-bronze/40 hover:bg-white/80"
+          >
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(176,138,74,0.18),_transparent_55%)] opacity-0 transition group-hover:opacity-100" />
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="grid h-9 w-9 place-items-center rounded-xl border border-bronze/40 bg-ink text-bronze shadow-sm">
+                    ☯
+                  </span>
+                  <div>
+                    <div className="text-sm font-semibold text-ink">命盘</div>
+                    <div className="text-[11px] tracking-[0.2em] text-ink/50">
+                      ZI WEI BOARD
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-3 text-xs text-ink/70">
+                  4×4 宫位盘，一眼看格局与四化。
+                </div>
+              </div>
+              <span className="rounded-full border border-ink/10 bg-white px-3 py-1 text-[11px] font-semibold text-ink/70 transition group-hover:border-bronze/40 group-hover:text-ink">
+                进入 →
+              </span>
+            </div>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => goToFeature("kline")}
+            className="group relative overflow-hidden rounded-2xl border border-ink/10 bg-white/70 p-4 text-left shadow-panel backdrop-blur-sm transition hover:border-bronze/40 hover:bg-white/80"
+          >
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(15,118,110,0.14),_transparent_55%)] opacity-0 transition group-hover:opacity-100" />
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="grid h-9 w-9 place-items-center rounded-xl border border-bronze/40 bg-ink text-bronze shadow-sm">
+                    ◆
+                  </span>
+                  <div>
+                    <div className="text-sm font-semibold text-ink">K线</div>
+                    <div className="text-[11px] tracking-[0.2em] text-ink/50">
+                      LIFE K-LINE
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-3 text-xs text-ink/70">
+                  相对运势 / 绝对成就，一条曲线看起伏。
+                </div>
+              </div>
+              <span className="rounded-full border border-ink/10 bg-white px-3 py-1 text-[11px] font-semibold text-ink/70 transition group-hover:border-bronze/40 group-hover:text-ink">
+                进入 →
+              </span>
+            </div>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => goToFeature("chat")}
+            className="group relative overflow-hidden rounded-2xl border border-ink/10 bg-white/70 p-4 text-left shadow-panel backdrop-blur-sm transition hover:border-bronze/40 hover:bg-white/80"
+          >
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(176,138,74,0.14),_transparent_55%)] opacity-0 transition group-hover:opacity-100" />
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="grid h-9 w-9 place-items-center rounded-xl border border-bronze/40 bg-ink text-bronze shadow-sm">
+                    问
+                  </span>
+                  <div>
+                    <div className="text-sm font-semibold text-ink">问答</div>
+                    <div className="text-[11px] tracking-[0.2em] text-ink/50">
+                      MASTER CHAT
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-3 text-xs text-ink/70">
+                  对着命盘提问，获得更具体的建议。
+                </div>
+              </div>
+              <span className="rounded-full border border-ink/10 bg-white px-3 py-1 text-[11px] font-semibold text-ink/70 transition group-hover:border-bronze/40 group-hover:text-ink">
+                进入 →
+              </span>
+            </div>
+          </button>
+        </section>
 
         <section className="grid gap-6 lg:grid-cols-[360px_1fr]">
           <form
+            ref={formRef}
             onSubmit={handleSubmit}
             className="flex flex-col gap-4 rounded-xl border border-mist bg-white/80 p-6 shadow-panel"
           >
@@ -344,40 +477,30 @@ export default function Home() {
           </form>
 
           <div className="flex flex-col gap-4">
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="flex flex-wrap items-center gap-2 rounded-full border border-ink/10 bg-white/70 p-1 shadow-sm">
               <button
                 type="button"
-                onClick={() => setActiveTab("chart")}
-                className={`rounded-full px-4 py-2 text-xs font-semibold ${
-                  activeTab === "chart"
-                    ? "bg-slateblue text-white"
-                    : "bg-white text-slateblue"
-                }`}
+                onClick={() => goToFeature("chart")}
+                className={tabClass(activeTab === "chart")}
               >
                 命盘
               </button>
               <button
                 type="button"
-                onClick={() => setActiveTab("kline")}
-                className={`rounded-full px-4 py-2 text-xs font-semibold ${
-                  activeTab === "kline"
-                    ? "bg-slateblue text-white"
-                    : "bg-white text-slateblue"
-                }`}
+                onClick={() => goToFeature("kline")}
+                className={tabClass(activeTab === "kline")}
               >
                 K线
               </button>
               <button
                 type="button"
-                onClick={() => setActiveTab("chat")}
-                className={`rounded-full px-4 py-2 text-xs font-semibold ${
-                  activeTab === "chat"
-                    ? "bg-slateblue text-white"
-                    : "bg-white text-slateblue"
-                }`}
+                onClick={() => goToFeature("chat")}
+                className={tabClass(activeTab === "chat")}
               >
                 问答
               </button>
+              </div>
               {result?.warnings?.length ? (
                 <span className="text-[11px] text-amber-700">
                   {result.warnings.join(";")}
@@ -390,7 +513,7 @@ export default function Home() {
                 请先填写出生信息并生成命盘
               </div>
             ) : (
-              <div className="flex flex-col gap-6">
+              <div ref={resultRef} className="flex flex-col gap-6">
                 <div className="hidden rounded-xl border border-mist bg-white/80 p-4 shadow-panel sm:block">
                   {activeTab === "chart" ? (
                     <ChartBoard chart={result.chart} />
@@ -471,9 +594,21 @@ export default function Home() {
                   ) : null}
 
                   {analysisText ? (
-                    parsedAnalysis.length > 0 ? (
+                    <>
+                      {toneProverb ? (
+                        <div className="mt-4 rounded-xl border border-bronze/30 bg-gradient-to-r from-ink via-ink to-[#0f172a] p-4 text-white shadow-sm">
+                          <div className="text-[10px] font-semibold tracking-[0.28em] text-bronze">
+                            箴言定调
+                          </div>
+                          <div className="mt-2 text-base font-semibold leading-relaxed">
+                            {toneProverb}
+                          </div>
+                        </div>
+                      ) : null}
+
+                      {parsedAnalysisBody.length > 0 ? (
                       <div className="mt-4 grid gap-4">
-                        {parsedAnalysis.map((item) => (
+                        {parsedAnalysisBody.map((item) => (
                           <div
                             key={item.title}
                             className="rounded-lg border border-ink/10 bg-white p-4 text-sm shadow-sm"
@@ -541,9 +676,10 @@ export default function Home() {
                       </div>
                     ) : (
                       <pre className="mt-4 whitespace-pre-wrap rounded-lg border border-mist/80 bg-white/90 p-4 text-sm text-ink/80">
-                        {analysisText}
+                        {analysisBody || analysisText}
                       </pre>
-                    )
+                    )}
+                    </>
                   ) : (
                     <div className="mt-3 text-xs text-ink/60">
                       点击“生成解读”获取分析内容。
