@@ -1,6 +1,6 @@
 # life-kline — Zi Wei Dou Shu × “Life K-Line”
 
-Personal project, just for fun.
+Personal project, just for fun. Preview: https://ziweidoushu-k-line.vercel.app/
 
 ## Status
 
